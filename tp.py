@@ -1,31 +1,106 @@
 
-import tweepy
-from tweepy.streaming import StreamListener, Stream
-from tweepy.auth import OAuthHandler
-from tweepy.api import API
+import datetime
+import random
 from datetime import timedelta
 
-CONSUMER_KEY = ''
-CONSUMER_SECRET = ''
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-ACCESS_TOKEN = ''
-ACCESS_SECRET = ''
+import tweepy
+from tweepy.api import API
+from tweepy.auth import OAuthHandler
+from tweepy.streaming import Stream, StreamListener
+
+
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 api = tweepy.API(auth)
+
+kuskemeigen = ['twitterはじめました', 'よかった', '今日から競プロを頑張ります',
+               'ディープラーニングってどれ位層が深いとディープって呼ばれるのだろうか', '英語が読めるようになりたいなぁ',
+               '英語が読めるようになりたいなぁ', '10円ガムおいしい 今日は一つあたりが出ました。',
+               '今日も10円ガムが一つ当たりました。 4つ買ったので、すごくおいしい',
+               'codeforces出ます', '無性に何かが作りたい気分', 'Kickするよ'
+               ]
+
+member = ['accidentガチャ', 'たんちゃんガチャ', 'RIANガチャ', 'niiガチャ', 'とがガチャ', 'bwamガチャ',
+          'kakuガチャ', 'はねガチャ', 'けいだろうガチャ', 'なふもたんガチャ', 'らろんずガチャ', 'ぞへガチャ',
+          'ミドリムシガチャ', 'じぇらんガチャ', 'よわそうガチャ', 'カコハテガチャ', 'ままガチャ']
+
+memberid = ['accidentSHI', 'tancahn2380', 'RianDigital', 'nii1531', '57tggx',
+            'babcs2035', 'kakudtm', 'BgCA92JGntQnPW8', 'keidaroo', 'Nafmo2', 'rullonz',
+            'zohe_alak', 'kjuner8', 'Yukkuri_Jeran', 'yowasou_zako', 'kakko_hatena', 'mkmsk2002']
+
+
+def Follows():
+    all_friends = list()
+    for friend in tweepy.Cursor(api.friends_ids).items():
+        all_friends.append(friend)
+    return all_friends
+
+
+def getfollowers():
+    all_followers = list()
+    for friend in tweepy.Cursor(api.followers_ids).items():
+        all_followers.append(friend)
+    return all_followers
+
 
 class AbstractedlyListener(StreamListener):
     def on_status(self, status):
         status.created_at += timedelta(hours=9)
-        #print(u"{text}".format(text=status.text))
-        #print(u"{name}({screen}) {created} via {src}\n".format(
+        print(u"{text}".format(text=status.text))
+        # print(u"{name}({screen}) {created} via {src}\n".format(
     #        name=status.author.name, screen=status.author.screen_name,
     #        created=status.created_at, src=status.source))
-        if status.author.screen_name=='Kuske':
-            api.retweet(status.id)
-            api.create_favorite(status.id)
+        if status.author.screen_name == 'Keidarou':
+            return
+        if status.text.find('twitter.com') != -1:
+            return
+        if status.author.screen_name == 'SpidCorCandy':
+            if status.text[0:2] != 'RT' and status.text[0] != '@':
+                api.create_favorite(status.id)
+                if random.randrange(0, 100) <= 9:
+                    api.retweet(status.id)
+
+        if status.text.find('Kuske') != -1 and status.text.find('ガチャ') != -1:
+            if(status.text.find('RT') != -1):
+                return
+            # もしKuskeガチャがひかれたら
+            ran = random.randrange(0, len(kuskemeigen))
+            st = '@' + status.author.screen_name + ' ' + kuskemeigen[ran]
+            api.update_status(st, status.id)
+        else:
+            st = 'ごめんこれバグ！ｗ'
+            for mem in member:
+                if status.text.find(mem) != -1:  # メンバーがいる
+                    target = memberid[member.index(mem)]
+                    ran = random.randrange(0, 20)
+                    itr = 0
+                    for tweet in tweepy.Cursor(api.user_timeline,
+                                               screen_name=target,
+                                               exclude_replies=True).items():
+                        if 'RT' in tweet.text:
+                            continue
+                        if itr == ran:
+                            break
+                        if tweet.text.find('t.co') != -1:
+                            continue
+                        st = '@' + status.author.screen_name + ' ' + tweet.text
+                        itr += 1
+                    api.update_status(st, status.id)
+                    return
+
 
 if __name__ == '__main__':
+    #st = '起動しました！！ ' + str(datetime.datetime.now())
+    # api.update_status(st)
+    all_follow = Follows()
+    all_follower = getfollowers()
+    '''for flwr in all_follower:
+        if(flwr not in all_follow):
+            api.create_friendship(flwr)
+    for flw in all_follow:
+        if(flw not in all_follower):
+            api.destroy_friendship(flw)
+    '''
     stream = Stream(auth, AbstractedlyListener(), secure=True)
     stream.userstream()
-    #public_tweets=api.home_timeline()
-#python3 tp.py
+    # public_tweets=api.home_timeline()
+# python3 tp.py
