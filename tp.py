@@ -7,8 +7,6 @@ import tweepy
 from tweepy.api import API
 from tweepy.auth import OAuthHandler
 from tweepy.streaming import Stream, StreamListener
-
-
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 api = tweepy.API(auth)
 
@@ -21,11 +19,14 @@ kuskemeigen = ['twitterはじめました', 'よかった', '今日から競プ�
 
 member = ['accidentガチャ', 'たんちゃんガチャ', 'RIANガチャ', 'niiガチャ', 'とがガチャ', 'bwamガチャ',
           'kakuガチャ', 'はねガチャ', 'けいだろうガチャ', 'なふもたんガチャ', 'らろんずガチャ', 'ぞへガチャ',
-          'ミドリムシガチャ', 'じぇらんガチャ', 'よわそうガチャ', 'カコハテガチャ', 'ままガチャ']
+          'ミドリムシガチャ', 'じぇらんガチャ', 'よわそうガチャ', 'カコハテガチャ', 'ヴァネロピガチャ', 'ndifixガチャ', '物理好きガチャ',
+          'mokoガチャ', 'うしガチャ', 'Trumpガチャ', '安倍晋三ガチャ']
 
 memberid = ['accidentSHI', 'tancahn2380', 'RianDigital', 'nii1531', '57tggx',
             'babcs2035', 'kakudtm', 'BgCA92JGntQnPW8', 'keidaroo', 'Nafmo2', 'rullonz',
-            'zohe_alak', 'kjuner8', 'Yukkuri_Jeran', 'yowasou_zako', 'kakko_hatena', 'mkmsk2002']
+            'zohe_alak', 'kjuner8', 'Yukkuri_Jeran', 'yowasou_zako', 'kakko_hatena', 'Vane11ope', 'ndifix', 'butsurizuki', 'e28880AIe28883', 'ei1333', 'realDonaldTrump', 'AbeShinzo']
+
+kinku = ['t.co', '定期', 'ポストに', 'ツイ廃結果', 'ガチャ']
 
 
 def Follows():
@@ -58,7 +59,12 @@ class AbstractedlyListener(StreamListener):
                 api.create_favorite(status.id)
                 if random.randrange(0, 100) <= 9:
                     api.retweet(status.id)
-
+        if 'RT' in status.text:
+            return
+        if 'AC' in status.text:
+            st = '@' + status.author.screen_name + ' はいプロ\n世界一ACが上手\nAC界のtourist\n実質僕'
+            api.update_status(st, status.id)
+            return
         if status.text.find('Kuske') != -1 and status.text.find('ガチャ') != -1:
             if(status.text.find('RT') != -1):
                 return
@@ -78,19 +84,29 @@ class AbstractedlyListener(StreamListener):
                                                exclude_replies=True).items():
                         if 'RT' in tweet.text:
                             continue
-                        if itr == ran:
-                            break
                         if tweet.text.find('t.co') != -1:
                             continue
+                        flag = False
+                        for kinsi in kinku:
+                            if kinsi in tweet.text:
+                                flag = True
+                                break
+                        if flag == True:
+                            continue
+			if '@' in tweet.text:
+			    continue
                         st = '@' + status.author.screen_name + ' ' + tweet.text
+
+                        if itr >= ran:
+                            break
                         itr += 1
                     api.update_status(st, status.id)
                     return
 
 
 if __name__ == '__main__':
-    #st = '起動しました！！ ' + str(datetime.datetime.now())
-    # api.update_status(st)
+    st = '起動しました！！ ' + str(datetime.datetime.now())
+    api.update_status(st)
     all_follow = Follows()
     all_follower = getfollowers()
     '''for flwr in all_follower:
