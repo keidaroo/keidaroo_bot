@@ -7,6 +7,7 @@ import tweepy
 from tweepy.api import API
 from tweepy.auth import OAuthHandler
 from tweepy.streaming import Stream, StreamListener
+
 auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET)
 api = tweepy.API(auth)
 
@@ -19,12 +20,20 @@ kuskemeigen = ['twitterはじめました', 'よかった', '今日から競プ�
 
 member = ['accidentガチャ', 'たんちゃんガチャ', 'RIANガチャ', 'niiガチャ', 'とがガチャ', 'bwamガチャ',
           'kakuガチャ', 'はねガチャ', 'けいだろうガチャ', 'なふもたんガチャ', 'らろんずガチャ', 'ぞへガチャ',
-          'ミドリムシガチャ', 'じぇらんガチャ', 'よわそうガチャ', 'カコハテガチャ', 'ヴァネロピガチャ', 'ndifixガチャ', '物理好きガチャ',
-          'mokoガチャ', 'うしガチャ', 'Trumpガチャ', '安倍晋三ガチャ']
+          'ミドリムシガチャ', 'じぇらんガチャ', 'よわそうガチャ', 'カコハテガチャ', 'ヴァネロピガチャ', 'ndifixガチャ',
+          '物理好きガチャ',
+          'mokoガチャ', 'うしガチャ', 'Trumpガチャ', '安倍晋三ガチャ', 'えいやガチャ', "sei0oガチャ",
+          'ヒトデマンガチャ', 'ふぁぼんガチャ', 'たかしよガチャ', 'たつやんガチャ', '補集合ガチャ', 'beetガチャ',
+          'カコハテガチャ', 'らびガチャ', 'ちくわガチャ']
 
 memberid = ['accidentSHI', 'tancahn2380', 'RianDigital', 'nii1531', '57tggx',
-            'babcs2035', 'kakudtm', 'BgCA92JGntQnPW8', 'keidaroo', 'Nafmo2', 'rullonz',
-            'zohe_alak', 'kjuner8', 'Yukkuri_Jeran', 'yowasou_zako', 'kakko_hatena', 'Vane11ope', 'ndifix', 'butsurizuki', 'e28880AIe28883', 'ei1333', 'realDonaldTrump', 'AbeShinzo']
+            'babcs2035', 'kakudtm', 'hane1046', 'keidaroo', 'Nafmo2',
+            'rullonz', 'zohe_alak',
+            'kjuner8', 'Yukkuri_Jeran', 'yowasou_zako', 'kakko_hatena',
+            'Vane11ope', 'ndifix', 'butsurizuki', 'e28880AIe28883', 'ei1333',
+            'realDonaldTrump', 'AbeShinzo', 'eiya5498513', 'sei0o',
+            'wait_sushi', 'syobon_hinata', 'tayo1325', 'tatuyan_edson',
+            'complement_real', 'beet_aizu', 'kakko_hatena', 'rabi10090314', 'i_chikuwa_']
 
 kinku = ['t.co', '定期', 'ポストに', 'ツイ廃結果', 'ガチャ']
 
@@ -61,10 +70,20 @@ class AbstractedlyListener(StreamListener):
                     api.retweet(status.id)
         if 'RT' in status.text:
             return
-        if 'AC' in status.text:
-            st = '@' + status.author.screen_name + ' はいプロ\n世界一ACが上手\nAC界のtourist\n実質僕'
+        if 'AC' in status.text and 'ACM' not in status.text and status.author.screen_name == 'keidaroo':
+            st = '@' + status.author.screen_name + ' ぽまえはもっと精進しろ！ｗ\n' + str(datetime.datetime.now())
             api.update_status(st, status.id)
             return
+        if 'ねむい' in status.text and status.author.screen_name == 'keidaroo':
+            st = '@' + status.author.screen_name + ' 「睡眠なんて死んでからいつでもできる」\n' + str(datetime.datetime.now())
+            api.update_status(st, status.id)
+            return
+        # if status.author.screen_name == 'tancahn2380' or status.author.screen_name == 'Yukkuri_Jeran' or status.author.screen_name == 'keidaroo':
+        #    if '@' in status.text or 'RT' in status.text:
+        #        return
+        #    st = '@' + status.author.screen_name + 'キ リ ト か な ー や っ ぱ り w w\n' + str(datetime.datetime.now())
+        #    api.update_status(st, status.id)
+        #    return
         if status.text.find('Kuske') != -1 and status.text.find('ガチャ') != -1:
             if(status.text.find('RT') != -1):
                 return
@@ -73,8 +92,8 @@ class AbstractedlyListener(StreamListener):
             st = '@' + status.author.screen_name + ' ' + kuskemeigen[ran]
             api.update_status(st, status.id)
         else:
-            st = 'ごめんこれバグ！ｗ'
             for mem in member:
+                st = 'ごめんこれバグ！ｗ'
                 if status.text.find(mem) != -1:  # メンバーがいる
                     target = memberid[member.index(mem)]
                     ran = random.randrange(0, 20)
@@ -91,10 +110,12 @@ class AbstractedlyListener(StreamListener):
                             if kinsi in tweet.text:
                                 flag = True
                                 break
-                        if flag == True:
+                        if flag is True:
                             continue
-			if '@' in tweet.text:
-			    continue
+                        if '@'in tweet.text:
+                            continue
+                        if len(status.text) > 130:
+                            continue
                         st = '@' + status.author.screen_name + ' ' + tweet.text
 
                         if itr >= ran:
@@ -116,6 +137,7 @@ if __name__ == '__main__':
         if(flw not in all_follower):
             api.destroy_friendship(flw)
     '''
+
     stream = Stream(auth, AbstractedlyListener(), secure=True)
     stream.userstream()
     # public_tweets=api.home_timeline()
